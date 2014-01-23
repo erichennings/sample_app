@@ -3,7 +3,8 @@ ruby '2.1.0'
 #ruby-gemset=railstutorial
 
 gem 'rails', '4.0.2'
-gem 'bootstrap-sass', '2.3.2.0'
+gem 'bootstrap-sass', '2.3.2.0'     # Twitter Bootstrap UI
+gem 'bcrypt-ruby', '3.1.2'          # Secure password digests
 
 group :development, :test do
   gem 'sqlite3', '1.3.8'
