@@ -12,7 +12,6 @@ describe 'Authentication' do
 
     it { should_not have_link 'Users' }
     it { should_not have_link 'Profile' }
-    it { should_not have_link 'Settings' }
     it { should_not have_link 'Sign out' }
   end
 
@@ -84,7 +83,7 @@ describe 'Authentication' do
           it { should have_title('Sign in') }
         end
 
-        describe 'visting the user index' do
+        describe 'visiting the user index' do
           before { visit users_path }
           it { should have_title('Sign in') }
         end
@@ -92,6 +91,18 @@ describe 'Authentication' do
         describe 'submitting to the update action' do
           before { patch user_path(user) }
           specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe 'visiting the following page' do
+          before { visit following_user_path(user) }
+          it { should have_title('Sign in') }
+          #expect(page).to have_title('Sign in')
+        end
+
+        context 'visiting the followers page' do
+          before { visit followers_user_path(user) }
+          it { should have_title('Sign in') }
+          #expect(page).to have_title('Sign in')
         end
       end
 
@@ -103,6 +114,18 @@ describe 'Authentication' do
 
         describe 'submitting to the destroy action' do
           before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end
+
+      describe 'in the Relationships controller' do
+        describe 'submitting to the create action' do
+          before { post relationships_path }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe 'submitting to the destroy action' do
+          before { delete relationship_path(1) }
           specify { expect(response).to redirect_to(signin_path) }
         end
       end
@@ -138,4 +161,40 @@ describe 'Authentication' do
     end
   end # describe authorization
 
+  describe 'following/followers' do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:other_user) { FactoryGirl.create(:user) }
+    before { user.follow!(other_user) }
+
+    describe 'followed users' do
+      before do
+        sign_in user
+        visit following_user_path(user)
+      end
+
+      it { should have_title(full_title('Following')) }
+      it { should have_selector('h3', text: 'Following') }
+      it { should have_link(other_user.name, href: user_path(other_user)) }
+
+      #expect(page).to have_title(full_title('Following'))
+      #expect(page).to have_selector('h3', text: 'Following')
+      #expect(page).to have_link(other_user.name, href: user_path(other_user))
+    end
+
+    describe 'followers' do
+      before do
+        sign_in other_user
+        visit followers_user_path(other_user)
+      end
+
+      it { should have_title(full_title('Followers')) }
+      it { should have_selector('h3', text: 'Followers') }
+      it { should have_link(user.name, href: user_path(user)) }
+
+      #expect(page).to have_title(full_title('Followers'))
+      #expect(page).to have_selector('h3', text: 'Followers')
+      #expect(page).to have_link(user.name, href: user_path(user))
+    end
+
+  end
 end
